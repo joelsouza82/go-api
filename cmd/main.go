@@ -13,7 +13,7 @@ func main() {
 	server := gin.Default()
 	dbConnection, err := db.ConnectDB()
 	if err != nil {
-		panic(err)
+		panic("Erro de conexão com o banco de dados: " + err.Error())
 	}
 
 	ProductRepository := repository.NewProductRepository(dbConnection)
