@@ -29,5 +29,12 @@ func main() {
 	server.GET("/products", ProductController.GetProducts)
 	server.POST("/product", ProductController.CreateProduct)
 	server.GET("/product/:productId", ProductController.GetProductById)
+
+	PersonalRepository := repository.NewPersonalRepository(dbConnection)
+	PersonalUseCase := usecase.NewPersonalUseCase(PersonalRepository)
+	PersonalController := controller.NewPersonalController(PersonalUseCase)
+
+	server.GET("/personals", PersonalController.GetPersonals)
+
 	server.Run(":8000")
 }
