@@ -18,3 +18,13 @@ func NewPersonalUseCase(repo repository.PersonalRepository) PersonalUseCase {
 func (uc *PersonalUseCase) GetPersonals() ([]model.Personal, error) {
 	return uc.repository.GetPersonals()
 }
+
+func (uc *PersonalUseCase) CreatePersonal(personal model.Personal) (model.Personal, error) {
+	personalId, err := uc.repository.CreatePersonal(personal)
+	if err != nil {
+		return model.Personal{}, err
+	}
+
+	personal.ID = personalId
+	return personal, nil
+}
