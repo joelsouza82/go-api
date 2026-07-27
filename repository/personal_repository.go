@@ -59,3 +59,35 @@ func (pr *PersonalRepository) GetPersonals() ([]model.Personal, error) {
 
 	return personalList, nil
 }
+
+func (pr *PersonalRepository) CreatePersonal(personal model.Personal) (int, error) {
+	var id int
+	query, err := pr.connection.Prepare("INSERT INTO personal " +
+		"(address, city, neighborhood, state, cep, phone, email, website, linkedin, github) " +
+		"VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id")
+	if err != nil {
+		fmt.Println(err)
+		return 0, err
+	}
+
+	err = query.QueryRow(
+		personal.Address,
+		personal.City,
+		personal.Neighborhood,
+		personal.State,
+		personal.Cep,
+		personal.Phone,
+		personal.Email,
+		personal.Website,
+		personal.Linkedin,
+		personal.Github,
+	).Scan(&id)
+
+	if err != nil {
+		fmt.Println(err)
+		return 0, err
+	}
+
+	query.Close()
+	return id, nil
+}

@@ -35,6 +35,7 @@ func main() {
 	PersonalController := controller.NewPersonalController(PersonalUseCase)
 
 	server.GET("/personals", PersonalController.GetPersonals)
+	server.POST("/personal", PersonalController.CreatePersonal)
 
 	server.Run(":8000")
 }
