@@ -31,11 +31,13 @@ func main() {
 	server.GET("/product/:productId", ProductController.GetProductById)
 
 	PersonalRepository := repository.NewPersonalRepository(dbConnection)
-	PersonalUseCase := usecase.NewPersonalUseCase(PersonalRepository)
+	PersonalUseCase := usecase.NewPersonalUseCase(PersonalRepository) // Nenhuma mudança necessária aqui, Go lida com isso.
 	PersonalController := controller.NewPersonalController(PersonalUseCase)
 
 	server.GET("/personals", PersonalController.GetPersonals)
 	server.POST("/personal", PersonalController.CreatePersonal)
+	server.PUT("/personal/:personalId", PersonalController.UpdatePersonal)
+	server.DELETE("/personal/:personalId", PersonalController.DeletePersonal)
 
 	server.Run(":8000")
 }

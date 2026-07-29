@@ -6,10 +6,10 @@ import (
 )
 
 type PersonalUseCase struct {
-	repository repository.PersonalRepository
+	repository repository.PersonalRepositoryInterface
 }
 
-func NewPersonalUseCase(repo repository.PersonalRepository) PersonalUseCase {
+func NewPersonalUseCase(repo repository.PersonalRepositoryInterface) PersonalUseCase {
 	return PersonalUseCase{
 		repository: repo,
 	}
@@ -27,4 +27,12 @@ func (uc *PersonalUseCase) CreatePersonal(personal model.Personal) (model.Person
 
 	personal.ID = personalId
 	return personal, nil
+}
+
+func (uc *PersonalUseCase) UpdatePersonal(personal model.Personal) (model.Personal, error) {
+	return uc.repository.UpdatePersonal(personal)
+}
+
+func (uc *PersonalUseCase) DeletePersonal(id int) error {
+	return uc.repository.DeletePersonal(id)
 }

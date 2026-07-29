@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"go-api/model"
 )
@@ -10,8 +11,8 @@ type PersonalRepository struct {
 	connection *sql.DB
 }
 
-func NewPersonalRepository(connection *sql.DB) PersonalRepository {
-	return PersonalRepository{
+func NewPersonalRepository(connection *sql.DB) PersonalRepositoryInterface {
+	return &PersonalRepository{
 		connection: connection,
 	}
 }
@@ -90,4 +91,66 @@ func (pr *PersonalRepository) CreatePersonal(personal model.Personal) (int, erro
 
 	query.Close()
 	return id, nil
+}
+
+func (pr *PersonalRepository) UpdatePersonal(personal model.Personal) (model.Personal, error) {
+	query := "UPDATE personal SET " +
+		"address=$1, city=$2, neighborhood=$3, state=$4, cep=$5, phone=$6, email=$7, website=$8, linkedin=$9, github=$10 " +
+		"WHERE id=$11"
+
+	stmt, err := pr.connection.Prepare(query)
+	if err != nil {
+		fmt.Println(err)
+		return model.Personal{}, err
+	}
+	defer stmt.Close()
+
+	result, err := stmt.Exec(
+		personal.Address,
+		personal.City,
+		personal.Neighborhood,
+		personal.State,
+		personal.Cep,
+		personal.Phone,
+		personal.Email,
+		personal.Website,
+		personal.Linkedin,
+		personal.Github,
+		personal.ID,
+	)
+	if err != nil {
+		fmt.Println(err)
+		return model.Personal{}, err
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected == 0 {
+		return model.Personal{}, errors.New("personal not found")
+	}
+
+	return personal, nil
+}
+
+func (pr *PersonalRepository) DeletePersonal(id int) error {
+	query := "DELETE FROM personal WHERE id=$1"
+
+	stmt, err := pr.connection.Prepare(query)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	defer stmt.Close()
+
+	result, err := stmt.Exec(id)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected == 0 {
+		return errors.New("personal not found")
+	}
+
+	return nil
 }
