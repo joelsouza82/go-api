@@ -1,13 +1,13 @@
 # Documentação da API Go-API
 
 ## 📖 Descrição
-Este projeto é uma API RESTful desenvolvida em **Go**, projetada utilizando **Arquitetura em Camadas (Clean Architecture)**. A aplicação oferece rotas para gerenciamento de **produtos** (listagem, busca por ID e criação) e consulta de **informações pessoais/perfil**.
+Este projeto é uma API RESTful desenvolvida em **Go**, projetada utilizando **Arquitetura em Camadas (Clean Architecture)**. A aplicação oferece um CRUD completo para o gerenciamento de **informações pessoais/perfil**.
 
 ---
 
 ## 🛠️ Linguagem e Tecnologias Utilizadas
 
-- **Linguagem:** [Go (Golang)](https://go.dev/) (v1.26+)
+- **Linguagem:** [Go (Golang)](https://go.dev/) (v1.22+)
 - **Framework Web:** [Gin Gonic](https://github.com/gin-gonic/gin) — Framework HTTP de alta performance para Go.
 - **Banco de Dados:** [PostgreSQL](https://www.postgresql.org/) (Hospedado na plataforma Supabase).
 - **Driver de Banco de Dados:** `github.com/lib/pq` (Consultas SQL nativas através da biblioteca standard `database/sql`).
@@ -53,6 +53,7 @@ A aplicação adota o padrão de **Arquitetura em Camadas (Clean Architecture)**
 2. **UseCase (`usecase/`)**: Implementa a lógica de negócios e as regras da aplicação.
 3. **Repository (`repository/`)**: Abstrai o acesso aos dados e interage diretamente com o banco PostgreSQL por meio de queries SQL (`SELECT`, `INSERT`).
 4. **Model (`model/`)**: Define as estruturas de dados (structs) mapeadas em JSON.
+5. **Mocks (`mocks/`)**: Contém os mocks das interfaces para utilização nos testes unitários.
 5. **DB (`db/`)**: Gerencia e estabelece a conexão com a base de dados PostgreSQL.
 
 ---
@@ -63,12 +64,7 @@ A API conecta-se a um banco de dados **PostgreSQL** utilizando consultas SQL nat
 
 ### Estrutura das Tabelas:
 
-#### 1. Tabela `product`
-- `id` (INTEGER / SERIAL - Chave primária)
-- `product_name` (VARCHAR)
-- `price` (NUMERIC / FLOAT)
-
-#### 2. Tabela `personal`
+#### Tabela `personal`
 - `id` (INTEGER / SERIAL - Chave primária)
 - `address`, `city`, `neighborhood`, `state`, `cep`, `phone`, `email`, `website`, `linkedin`, `github` (VARCHAR)
 
@@ -79,22 +75,24 @@ A API conecta-se a um banco de dados **PostgreSQL** utilizando consultas SQL nat
 ```text
 go-api/
 ├── cmd/
-│   └── main.go                 # Ponto de entrada da aplicação e registro de rotas
+│   └── main.go                     # Ponto de entrada e registro de rotas
 ├── controller/
-│   ├── personal_controller.go  # Controller para rotas de informações pessoais
-│   └── product_contoller.go    # Controller para rotas de produtos
+│   ├── personal_controller.go      # Controller para a entidade Personal
+│   └── personal_controller_test.go # Testes do controller
 ├── db/
-│   └── conn.go                 # Conexão com o banco PostgreSQL
+│   └── conn.go                     # Conexão com o banco de dados
+├── mocks/
+│   ├── personal_repository_mock.go # Mock do repositório Personal
+│   └── personal_usecase_mock.go    # Mock do use case Personal
 ├── model/
-│   ├── personal.go             # Struct do modelo Personal
-│   ├── product.go              # Struct do modelo Product
-│   └── response.go             # Struct para respostas customizadas de erro
+│   └── personal.go                 # Struct do modelo Personal
 ├── repository/
-│   ├── personal_repository.go  # Manipulação SQL da tabela personal
-│   └── product_repository.go   # Manipulação SQL da tabela product
+│   ├── personal_repository.go           # Implementação do repositório
+│   ├── personal_repository_interface.go # Interface do repositório
+│   └── personal_repository_test.go    # Testes do repositório
 ├── usecase/
-│   ├── personal_usecase.go     # Regras de negócio do domínio Personal
-│   └── product_usecase.go      # Regras de negócio do domínio Product
+│   ├── personal_usecase.go          # Regras de negócio da entidade Personal
+│   └── personal_usecase_test.go     # Testes do use case
 ├── Dockerfile                  # Configuração para geração de imagem Docker
 ├── docker-compose.yml          # Orquestração do serviço da API
 ├── go.mod                      # Dependências do módulo Go
@@ -156,64 +154,7 @@ Endpoint de verificação de status da API.
 
 ---
 
-### 📦 Produtos (`/product` e `/products`)
-
-#### `GET /products`
-Lista todos os produtos cadastrados.
-- **Resposta Sucesso (`200 OK`):**
-  ```json
-  [
-    {
-      "id_product": 1,
-      "name": "Notebook",
-      "price": 3500.00
-    }
-  ]
-  ```
-
----
-
-#### `GET /product/:productId`
-Busca os detalhes de um produto específico através do ID fornecido na URL.
-- **Parâmetro de URL:** `productId` (Inteiro)
-- **Resposta Sucesso (`200 OK`):**
-  ```json
-  {
-    "id_product": 1,
-    "name": "Notebook",
-    "price": 3500.00
-  }
-  ```
-- **Resposta Erro (`404 Not Found`):**
-  ```json
-  {
-    "error": "Produto não foi encontrado na base de dados"
-  }
-  ```
-
----
-
-#### `POST /product`
-Cria um novo produto.
-- **Corpo da Requisição (`application/json`):**
-  ```json
-  {
-    "name": "Mouse Sem Fio",
-    "price": 89.90
-  }
-  ```
-- **Resposta Sucesso (`201 Created`):**
-  ```json
-  {
-    "id_product": 2,
-    "name": "Mouse Sem Fio",
-    "price": 89.90
-  }
-  ```
-
----
-
-### 👤 Informações Pessoais (`/personals`)
+###  Informações Pessoais (`/personal` e `/personals`)
 
 #### `GET /personals`
 Retorna as informações de perfis pessoais armazenadas.
