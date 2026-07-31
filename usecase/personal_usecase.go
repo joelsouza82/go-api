@@ -15,6 +15,10 @@ func NewPersonalUseCase(repo repository.PersonalRepositoryInterface) PersonalUse
 	}
 }
 
+func (uc *PersonalUseCase) GetPersonalByID(id int) (model.Personal, error) {
+	return uc.repository.GetPersonalByID(id)
+}
+
 func (uc *PersonalUseCase) GetPersonals() ([]model.Personal, error) {
 	return uc.repository.GetPersonals()
 }

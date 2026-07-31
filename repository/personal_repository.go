@@ -17,6 +17,36 @@ func NewPersonalRepository(connection *sql.DB) PersonalRepositoryInterface {
 	}
 }
 
+func (pr *PersonalRepository) GetPersonalByID(id int) (model.Personal, error) {
+	query := "SELECT id, address, neighborhood, state, city, cep, phone, email, website, linkedin, github FROM personal WHERE id=$1"
+	row := pr.connection.QueryRow(query, id)
+
+	var personalObj model.Personal
+	err := row.Scan(
+		&personalObj.ID,
+		&personalObj.Address,
+		&personalObj.Neighborhood,
+		&personalObj.State,
+		&personalObj.City,
+		&personalObj.Cep,
+		&personalObj.Phone,
+		&personalObj.Email,
+		&personalObj.Website,
+		&personalObj.Linkedin,
+		&personalObj.Github,
+	)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return model.Personal{}, errors.New("personal not found")
+		}
+		fmt.Println(err)
+		return model.Personal{}, err
+	}
+
+	return personalObj, nil
+}
+
 func (pr *PersonalRepository) GetPersonals() ([]model.Personal, error) {
 	query := "SELECT id, address, neighborhood, state, city, cep, phone, email, website, linkedin, github FROM personal"
 	rows, err := pr.connection.Query(query)

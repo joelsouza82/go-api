@@ -21,6 +21,72 @@ func setupRouter() *gin.Engine {
 	return router
 }
 
+func TestPersonalController_GetPersonalByID(t *testing.T) {
+	mockUseCase := new(mocks.PersonalUseCaseMock)
+	controller := NewPersonalController(mockUseCase)
+
+	router := setupRouter()
+	router.GET("/personal/:personalId", controller.GetPersonalByID)
+
+	personalMock := model.Personal{
+		ID:    1,
+		Email: "test.user@example.com",
+	}
+
+	t.Run("Success", func(t *testing.T) {
+		mockUseCase.On("GetPersonalByID", 1).Return(personalMock, nil).Once()
+
+		req, _ := http.NewRequest(http.MethodGet, "/personal/1", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		var responsePersonal model.Personal
+		err := json.Unmarshal(w.Body.Bytes(), &responsePersonal)
+		assert.NoError(t, err)
+		assert.Equal(t, personalMock, responsePersonal)
+
+		mockUseCase.AssertExpectations(t)
+	})
+
+	t.Run("Invalid ID", func(t *testing.T) {
+		req, _ := http.NewRequest(http.MethodGet, "/personal/abc", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.Contains(t, w.Body.String(), "ID de personal inválido")
+	})
+
+	t.Run("Not Found", func(t *testing.T) {
+		mockUseCase.On("GetPersonalByID", 1).Return(model.Personal{}, errors.New("personal not found")).Once()
+
+		req, _ := http.NewRequest(http.MethodGet, "/personal/1", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusNotFound, w.Code)
+		assert.Contains(t, w.Body.String(), "Registro de personal não encontrado")
+
+		mockUseCase.AssertExpectations(t)
+	})
+
+	t.Run("Internal Server Error", func(t *testing.T) {
+		internalError := errors.New("some internal error")
+		mockUseCase.On("GetPersonalByID", 1).Return(model.Personal{}, internalError).Once()
+
+		req, _ := http.NewRequest(http.MethodGet, "/personal/1", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+		assert.Contains(t, w.Body.String(), internalError.Error())
+
+		mockUseCase.AssertExpectations(t)
+	})
+}
+
 func TestPersonalController_UpdatePersonal(t *testing.T) {
 	mockUseCase := new(mocks.PersonalUseCaseMock)
 	controller := NewPersonalController(mockUseCase)

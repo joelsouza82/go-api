@@ -9,6 +9,37 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestPersonalUseCase_GetPersonalByID(t *testing.T) {
+	mockRepo := new(mocks.PersonalRepositoryMock)
+	useCase := NewPersonalUseCase(mockRepo)
+
+	personalMock := model.Personal{
+		ID:    1,
+		Email: "test@test.com",
+	}
+
+	t.Run("Success", func(t *testing.T) {
+		mockRepo.On("GetPersonalByID", 1).Return(personalMock, nil).Once()
+
+		personal, err := useCase.GetPersonalByID(1)
+
+		assert.NoError(t, err)
+		assert.Equal(t, personalMock, personal)
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("Repository Error", func(t *testing.T) {
+		repoError := errors.New("record not found")
+		mockRepo.On("GetPersonalByID", 1).Return(model.Personal{}, repoError).Once()
+
+		_, err := useCase.GetPersonalByID(1)
+
+		assert.Error(t, err)
+		assert.Equal(t, repoError, err)
+		mockRepo.AssertExpectations(t)
+	})
+}
+
 func TestPersonalUseCase_UpdatePersonal(t *testing.T) {
 	mockRepo := new(mocks.PersonalRepositoryMock)
 	// Agora podemos passar o mock diretamente, pois o UseCase espera a interface.

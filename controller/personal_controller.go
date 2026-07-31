@@ -19,6 +19,27 @@ func NewPersonalController(useCase usecase.PersonalUseCase) personalController {
 	}
 }
 
+func (p *personalController) GetPersonalByID(ctx *gin.Context) {
+	idStr := ctx.Param("personalId")
+	personalId, err := strconv.Atoi(idStr)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "ID de personal inválido"})
+		return
+	}
+
+	personal, err := p.personalUsecase.GetPersonalByID(personalId)
+	if err != nil {
+		if err.Error() == "personal not found" {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Registro de personal não encontrado"})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, personal)
+}
+
 func (p *personalController) GetPersonals(ctx *gin.Context) {
 	personals, err := p.personalUsecase.GetPersonals()
 	if err != nil {

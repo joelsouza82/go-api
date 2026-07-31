@@ -27,6 +27,7 @@ func main() {
 	PersonalController := controller.NewPersonalController(PersonalUseCase)
 
 	server.GET("/personals", PersonalController.GetPersonals)
+	server.GET("/personal/:personalId", PersonalController.GetPersonalByID)
 	server.POST("/personal", PersonalController.CreatePersonal)
 	server.PUT("/personal/:personalId", PersonalController.UpdatePersonal)
 	server.DELETE("/personal/:personalId", PersonalController.DeletePersonal)
