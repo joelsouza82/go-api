@@ -26,11 +26,21 @@ func main() {
 	PersonalUseCase := usecase.NewPersonalUseCase(PersonalRepository)
 	PersonalController := controller.NewPersonalController(PersonalUseCase)
 
+	LoginRepository := repository.NewLoginRepository(dbConnection)
+	LoginUseCase := usecase.NewLoginUseCase(LoginRepository)
+	LoginController := controller.NewLoginController(LoginUseCase)
+
 	server.GET("/personals", PersonalController.GetPersonals)
 	server.GET("/personal/:personalId", PersonalController.GetPersonalByID)
 	server.POST("/personal", PersonalController.CreatePersonal)
 	server.PUT("/personal/:personalId", PersonalController.UpdatePersonal)
 	server.DELETE("/personal/:personalId", PersonalController.DeletePersonal)
+
+	server.GET("/logins", LoginController.GetLogins)
+	server.GET("/login/:loginId", LoginController.GetLoginByID)
+	server.POST("/login", LoginController.CreateLogin)
+	server.PUT("/login/:loginId", LoginController.UpdateLogin)
+	server.DELETE("/login/:loginId", LoginController.DeleteLogin)
 
 	server.Run(":8000")
 }
