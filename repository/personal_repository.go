@@ -18,12 +18,15 @@ func NewPersonalRepository(connection *sql.DB) PersonalRepositoryInterface {
 }
 
 func (pr *PersonalRepository) GetPersonalByID(id int) (model.Personal, error) {
-	query := "SELECT id, address, neighborhood, state, city, cep, phone, email, website, linkedin, github FROM personal WHERE id=$1"
+	query := "SELECT id, name, rg, document, address, neighborhood, state, city, cep, phone, email, website, linkedin, github, birthdate, login_id FROM personal WHERE id=$1"
 	row := pr.connection.QueryRow(query, id)
 
 	var personalObj model.Personal
 	err := row.Scan(
 		&personalObj.ID,
+		&personalObj.Name,
+		&personalObj.Rg,
+		&personalObj.Document,
 		&personalObj.Address,
 		&personalObj.Neighborhood,
 		&personalObj.State,
@@ -34,6 +37,8 @@ func (pr *PersonalRepository) GetPersonalByID(id int) (model.Personal, error) {
 		&personalObj.Website,
 		&personalObj.Linkedin,
 		&personalObj.Github,
+		&personalObj.BirthDate,
+		&personalObj.LoginId,
 	)
 
 	if err != nil {
@@ -48,7 +53,7 @@ func (pr *PersonalRepository) GetPersonalByID(id int) (model.Personal, error) {
 }
 
 func (pr *PersonalRepository) GetPersonals() ([]model.Personal, error) {
-	query := "SELECT id, address, neighborhood, state, city, cep, phone, email, website, linkedin, github FROM personal"
+	query := "SELECT id, name, rg, document, address, neighborhood, state, city, cep, phone, email, website, linkedin, github, birthdate, login_id FROM personal"
 	rows, err := pr.connection.Query(query)
 	if err != nil {
 		fmt.Println(err)
@@ -61,6 +66,9 @@ func (pr *PersonalRepository) GetPersonals() ([]model.Personal, error) {
 	for rows.Next() {
 		err = rows.Scan(
 			&personalObj.ID,
+			&personalObj.Name,
+			&personalObj.Rg,
+			&personalObj.Document,
 			&personalObj.Address,
 			&personalObj.Neighborhood,
 			&personalObj.State,
@@ -71,6 +79,8 @@ func (pr *PersonalRepository) GetPersonals() ([]model.Personal, error) {
 			&personalObj.Website,
 			&personalObj.Linkedin,
 			&personalObj.Github,
+			&personalObj.BirthDate,
+			&personalObj.LoginId,
 		)
 
 		if err != nil {
@@ -94,14 +104,17 @@ func (pr *PersonalRepository) GetPersonals() ([]model.Personal, error) {
 func (pr *PersonalRepository) CreatePersonal(personal model.Personal) (int, error) {
 	var id int
 	query, err := pr.connection.Prepare("INSERT INTO personal " +
-		"(address, city, neighborhood, state, cep, phone, email, website, linkedin, github) " +
-		"VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id")
+		"(name, rg, document, address, city, neighborhood, state, cep, phone, email, website, linkedin, github, birthdate, login_id) " +
+		"VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING id")
 	if err != nil {
 		fmt.Println(err)
 		return 0, err
 	}
 
 	err = query.QueryRow(
+		personal.Name,
+		personal.Rg,
+		personal.Document,
 		personal.Address,
 		personal.City,
 		personal.Neighborhood,
@@ -112,6 +125,8 @@ func (pr *PersonalRepository) CreatePersonal(personal model.Personal) (int, erro
 		personal.Website,
 		personal.Linkedin,
 		personal.Github,
+		personal.BirthDate,
+		personal.LoginId,
 	).Scan(&id)
 
 	if err != nil {
@@ -125,8 +140,8 @@ func (pr *PersonalRepository) CreatePersonal(personal model.Personal) (int, erro
 
 func (pr *PersonalRepository) UpdatePersonal(personal model.Personal) (model.Personal, error) {
 	query := "UPDATE personal SET " +
-		"address=$1, city=$2, neighborhood=$3, state=$4, cep=$5, phone=$6, email=$7, website=$8, linkedin=$9, github=$10 " +
-		"WHERE id=$11"
+		"name=$1, rg=$2, document=$3, address=$4, city=$5, neighborhood=$6, state=$7, cep=$8, phone=$9, email=$10, website=$11, linkedin=$12, github=$13, birthdate=$14, login_id=$15 " +
+		"WHERE id=$16"
 
 	stmt, err := pr.connection.Prepare(query)
 	if err != nil {
@@ -136,6 +151,9 @@ func (pr *PersonalRepository) UpdatePersonal(personal model.Personal) (model.Per
 	defer stmt.Close()
 
 	result, err := stmt.Exec(
+		personal.Name,
+		personal.Rg,
+		personal.Document,
 		personal.Address,
 		personal.City,
 		personal.Neighborhood,
@@ -146,6 +164,8 @@ func (pr *PersonalRepository) UpdatePersonal(personal model.Personal) (model.Per
 		personal.Website,
 		personal.Linkedin,
 		personal.Github,
+		personal.BirthDate,
+		personal.LoginId,
 		personal.ID,
 	)
 	if err != nil {
