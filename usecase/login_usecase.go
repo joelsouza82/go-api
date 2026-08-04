@@ -9,8 +9,8 @@ type LoginUseCase struct {
 	repository repository.LoginRepositoryInterface
 }
 
-func NewLoginUseCase(repo repository.LoginRepositoryInterface) LoginUseCase {
-	return LoginUseCase{
+func NewLoginUseCase(repo repository.LoginRepositoryInterface) *LoginUseCase {
+	return &LoginUseCase{
 		repository: repo,
 	}
 }

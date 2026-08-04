@@ -10,10 +10,10 @@ import (
 )
 
 type loginController struct {
-	loginUsecase usecase.LoginUseCase
+	loginUsecase usecase.LoginUseCaseInterface
 }
 
-func NewLoginController(useCase usecase.LoginUseCase) loginController {
+func NewLoginController(useCase usecase.LoginUseCaseInterface) loginController {
 	return loginController{
 		loginUsecase: useCase,
 	}
@@ -53,13 +53,13 @@ func (l *loginController) CreateLogin(ctx *gin.Context) {
 	var login model.Login
 	err := ctx.BindJSON(&login)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	insertedLogin, err := l.loginUsecase.CreateLogin(login)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

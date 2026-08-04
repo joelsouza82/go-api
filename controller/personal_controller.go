@@ -10,10 +10,10 @@ import (
 )
 
 type personalController struct {
-	personalUsecase usecase.PersonalUseCase
+	personalUsecase usecase.PersonalUseCaseInterface
 }
 
-func NewPersonalController(useCase usecase.PersonalUseCase) personalController {
+func NewPersonalController(useCase usecase.PersonalUseCaseInterface) personalController {
 	return personalController{
 		personalUsecase: useCase,
 	}
@@ -53,13 +53,13 @@ func (p *personalController) CreatePersonal(ctx *gin.Context) {
 	var personal model.Personal
 	err := ctx.BindJSON(&personal)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	insertedPersonal, err := p.personalUsecase.CreatePersonal(personal)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
