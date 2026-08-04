@@ -9,8 +9,8 @@ type PersonalUseCase struct {
 	repository repository.PersonalRepositoryInterface
 }
 
-func NewPersonalUseCase(repo repository.PersonalRepositoryInterface) PersonalUseCase {
-	return PersonalUseCase{
+func NewPersonalUseCase(repo repository.PersonalRepositoryInterface) *PersonalUseCase {
+	return &PersonalUseCase{
 		repository: repo,
 	}
 }
@@ -28,7 +28,6 @@ func (uc *PersonalUseCase) CreatePersonal(personal model.Personal) (model.Person
 	if err != nil {
 		return model.Personal{}, err
 	}
-
 	personal.ID = personalId
 	return personal, nil
 }
